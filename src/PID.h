@@ -1,6 +1,8 @@
 #ifndef PID_H
 #define PID_H
 
+#include <vector>
+
 class PID {
 public:
   /*
@@ -10,7 +12,13 @@ public:
   double i_error;
   double d_error;
 
+  /*
+  * Twiddle Parameters
+  */
   bool twiddle;
+  int step;
+  std::vector<double> dp;
+    
 
   /*
   * Coefficients
@@ -37,7 +45,7 @@ public:
   /*
   * Update the PID error variables given cross track error.
   */
-  void UpdateError(double cte);
+  void UpdateError(double cte, double dt);
 
   /*
   * Calculate the total PID error.
