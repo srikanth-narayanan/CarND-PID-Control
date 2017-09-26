@@ -18,6 +18,9 @@ public:
   bool twiddle;
   int step;
   std::vector<double> dp;
+  double best_error;
+  double dp_sum;
+    
     
 
   /*
@@ -50,7 +53,17 @@ public:
   /*
   * Calculate the total PID error.
   */
-  double TotalError();
+  double TotalError(double cte);
+
+  /*
+  * Calculate the total sum of a vector.
+  */
+  double VectorSum(std::vector<double> vec);
+
+  /*
+  * Update the PID error variables given cross track error.
+  */
+  void UpdateGain(int index, double value);
 };
 
 #endif /* PID_H */
