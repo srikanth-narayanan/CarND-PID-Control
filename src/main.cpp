@@ -42,8 +42,8 @@ int main()
   // TODO: Initialize the pid variable for steer and throttle.
 
   // Start with first initialiser
-  pid_st.Init(0.08, 0.0003, 3.0);
-  pid_tr.Init(0.08, 0.0003, 3.0);
+  pid_st.Init(0.065, 0.0003, 3.0);
+  //pid_tr.Init(0.065, 0.0003, 3.0);
   
   previous_time = clock();
 
@@ -69,6 +69,8 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+          pid_st.ws = ws;
+          //pid_tr.ws = ws;
           // Get current time
           current_time = clock();
           delta_t = (current_time - previous_time)*1.0 / CLOCKS_PER_SEC;
@@ -80,17 +82,18 @@ int main()
                         -pid_st.Ki * pid_st.i_error;
           
           // Update throttle error
-          pid_tr.UpdateError(cte, delta_t);
-          throttle_value = 0.6 - pid_tr.Kp * pid_tr.p_error
-                           -pid_tr.Kd * pid_tr.d_error
-                           -pid_tr.Ki * pid_tr.i_error;
+          //pid_tr.UpdateError(cte, delta_t);
+          //throttle_value = 0.6 - pid_tr.Kp * pid_tr.p_error
+          //                 -pid_tr.Kd * pid_tr.d_error
+          //                 -pid_tr.Ki * pid_tr.i_error;
           
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = throttle_value;
+          msgJson["throttle"] = 0.3; // Throttle value while twiddle steering
+          //msgJson["throttle"] = throttle_value;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

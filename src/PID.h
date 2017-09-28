@@ -2,6 +2,7 @@
 #define PID_H
 
 #include <vector>
+#include <uWS/uWS.h>
 
 class PID {
 public:
@@ -17,10 +18,17 @@ public:
   */
   bool twiddle;
   int step;
+  int settle_step;
+  int eval_step;
   std::vector<double> dp;
   double best_error;
   double dp_sum;
-    
+  double total_error;
+  int param_state;
+  int twiddle_step;
+  int kp_state, ki_state, kd_state; // a state of 0 is default, 1 add, 2 sub
+  int kp_cycle, ki_cycle, kd_cycle; // one twiddle cycle 0 - continue, 1 - next param
+  uWS::WebSocket<uWS::SERVER> ws;
     
 
   /*
@@ -55,15 +63,17 @@ public:
   */
   double TotalError(double cte);
 
-  /*
-  * Calculate the total sum of a vector.
-  */
-  double VectorSum(std::vector<double> vec);
 
   /*
   * Update the PID error variables given cross track error.
   */
   void UpdateGain(int index, double value);
+  
+  /*
+  * A method to restart the simulator.
+  */
+  void Restart(uWS::WebSocket<uWS::SERVER> ws);
+    
 };
 
 #endif /* PID_H */
