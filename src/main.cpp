@@ -41,9 +41,12 @@ int main()
   PID pid_st, pid_tr;
   // TODO: Initialize the pid variable for steer and throttle.
 
-  // Start with first initialiser
-  pid_st.Init(0.065, 0.0003, 3.0);
-  //pid_tr.Init(0.065, 0.0003, 3.0);
+  // Finalised PID values for steering and Throttle
+  pid_st.Init(0.103731, 0.000219164, 3.0027);
+  pid_st.twiddle = false;
+  pid_tr.Init(0.290158, 9.1e-07, 0.1);
+  pid_tr.twiddle = false;
+    
   
   previous_time = clock();
 
@@ -70,32 +73,28 @@ int main()
           * another PID controller to control the speed!
           */
           pid_st.ws = ws;
-          //pid_tr.ws = ws;
-          // Get current time
-          current_time = clock();
-          delta_t = (current_time - previous_time)*1.0 / CLOCKS_PER_SEC;
+          pid_tr.ws = ws;
           
           // Update steering error
-          pid_st.UpdateError(cte, delta_t);
+          pid_st.UpdateError(cte);
           steer_value = -pid_st.Kp * pid_st.p_error
                         -pid_st.Kd * pid_st.d_error
                         -pid_st.Ki * pid_st.i_error;
           
           // Update throttle error
-          //pid_tr.UpdateError(cte, delta_t);
-          //throttle_value = 0.6 - pid_tr.Kp * pid_tr.p_error
-          //                 -pid_tr.Kd * pid_tr.d_error
-          //                 -pid_tr.Ki * pid_tr.i_error;
+          pid_tr.UpdateError(fabs(cte));
+          throttle_value = 0.75 - pid_tr.Kp * pid_tr.p_error
+                               - pid_tr.Kd * pid_tr.d_error
+                               - pid_tr.Ki * pid_tr.i_error;
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          //std::cout << "CTE: " << cte << " Steering Value: " << steer_value << " Throttle Value: " << throttle_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3; // Throttle value while twiddle steering
-          //msgJson["throttle"] = throttle_value;
+          msgJson["throttle"] = throttle_value;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

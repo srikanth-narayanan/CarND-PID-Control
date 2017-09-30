@@ -25,30 +25,30 @@ void PID::Init(double Kp, double Ki, double Kd) {
     // Intialise twiddle param
     step = 1;
     dp = {0.1*PID::Kp, 0.1*PID::Ki, 0.1*PID::Kd}; // Take 10% of the gains as initial
-    best_error = std::numeric_limits<double>::max(); // set a very large value as initial best error
+    best_error = std::numeric_limits<double>::max();; // set a very large value
     param_state = 0; // 0 - for kp, 1 - ki and 2 - kd
     twiddle_step = 1;
     kp_state = ki_state = kd_state = 0; // a state of 0 is default, 1 add, 2 sub
     kp_cycle = 0, ki_cycle = 1, kd_cycle = 1; // one twiddle cycle 0 - continue, 1 - next param
     settle_step = 100;
-    eval_step = 2000;
+    eval_step = 600;
     twiddle = true;
 }
 
-void PID::UpdateError(double cte, double dt) {
+void PID::UpdateError(double cte) {
     
     // Update error
     if (step == 1){
         // Initial d_error
         p_error = cte;
     }
-    d_error = (cte - p_error) / dt;
+    d_error = cte - p_error;
     p_error = cte;
     i_error += cte;
     
     if (step % (settle_step + eval_step) > settle_step){
-        cout << "Iteration : " << step << endl;
-        total_error += TotalError(cte);
+        //cout << "Iteration : " << step << endl;
+        total_error += pow(cte, 2);
     }
     
     // Apply twiddle after the simulation steps are reached for the next cycle
@@ -58,6 +58,10 @@ void PID::UpdateError(double cte, double dt) {
         cout << "Error Sum : " << dp_sum << endl;
         cout << "Total Error : " << total_error << endl;
         cout << "Best Error : " << best_error << endl;
+        
+        /*
+         * KP Iteration
+         */
         if (kp_cycle == 0){
             // Do stuff for KP
             cout << "IN KP !" << endl;
@@ -71,9 +75,12 @@ void PID::UpdateError(double cte, double dt) {
                 // Do things if previous state was add
                 if (total_error < best_error){
                     best_error = total_error;
-                    dp[0] *= 1.1; // Increase dp by 10%
+                    if (step != (settle_step + eval_step)){
+                        // no increase if its the first time
+                        dp[0] *= 1.1; // Increase dp by 10%
+                    }
                     kp_cycle = 1; // Pause KP
-                    ki_cycle = 0; /// Next cycle go to KI
+                    kd_cycle = 0; /// Next cycle go to KD
                     kp_state = 0; // reset for next run;
                     cout << "Addition Improved " << endl;
                 }
@@ -84,12 +91,13 @@ void PID::UpdateError(double cte, double dt) {
                 }
             }
             else if(kp_state == 2){
+                
                 // Do things if previous state was subtract
                 if (total_error < best_error){
                     best_error = total_error;
                     dp[0] *= 1.1; // Increase dp by 10%
                     kp_cycle = 1; // Pause KP
-                    ki_cycle = 0; /// Next cycle go to KI
+                    kd_cycle = 0; /// Next cycle go to KD
                     kp_state = 0; // reset for next run;
                     cout << "Subtration Improved " << endl;
                 }
@@ -97,54 +105,16 @@ void PID::UpdateError(double cte, double dt) {
                     Kp += dp[0]; // bring kp back to original state
                     dp[0] *= 0.9; // Take 90%
                     kp_cycle = 1; // Pause KP
-                    ki_cycle = 0; /// Next cycle go to KI
+                    kd_cycle = 0; /// Next cycle go to KD
                     kp_state = 0; // reset for next run;
-                    cout << "Nothing Improved " << endl;
+                    cout << "Nothing Improved, Reverting back" << endl;
                 }
             }
         }
         
-        else if (ki_cycle == 0){
-            // Do Stuff for KI
-            cout << "IN KI !" << endl;
-            if(ki_state == 0){
-                // Do things in default state (1st entry point every cycle)
-                Ki += dp[1];
-                ki_state = 1; // added
-            }
-            else if(ki_state == 1){
-                // Do things if previous state was add
-                if (total_error < best_error){
-                    best_error = total_error;
-                    dp[1] *= 1.1; // Increase dp by 10%
-                    ki_cycle = 1; // Pause KI
-                    kd_cycle = 0; /// Next cycle go to KD
-                    ki_state = 0; // reset for next run;
-                }
-                else{
-                    Ki -= 2 * dp[0];
-                    ki_state = 2; // Subtracted
-                }
-            }
-            else if(ki_state == 2){
-                // Do things if previous state was subtract
-                if (total_error < best_error){
-                    best_error = total_error;
-                    dp[1] *= 1.1; // Increase dp by 10%
-                    ki_cycle = 1; // Pause KI
-                    kd_cycle = 0; /// Next cycle go to KD
-                    ki_state = 0; // reset for next run;
-                }
-                else{
-                    Ki += dp[1]; // bring kp back to original state
-                    dp[1] *= 0.9; // Take 90%
-                    ki_cycle = 1; // Pause KI
-                    kd_cycle = 0; /// Next cycle go to KD
-                    ki_state = 0; // reset for next run;
-                }
-            }
-        }
-        
+        /*
+         * KD Iteration
+         */
         else if (kd_cycle == 0){
             // Do Stuff for KD
             cout << "IN KD !" << endl;
@@ -152,6 +122,7 @@ void PID::UpdateError(double cte, double dt) {
                 // Do things in default state (1st entry point every cycle)
                 Kd += dp[2];
                 kd_state = 1; // added
+                cout << "In addition " << endl;
             }
             else if(kd_state == 1){
                 // Do things if previous state was add
@@ -160,12 +131,14 @@ void PID::UpdateError(double cte, double dt) {
                     best_error = total_error;
                     dp[2] *= 1.1; // Increase dp by 10%
                     kd_cycle = 1; // Pause KD
-                    kp_cycle = 0; /// Next cycle go to Kp
+                    ki_cycle = 0; /// Next cycle go to Ki
                     kd_state = 0; // reset for next run;
+                    cout << "Addition Improved " << endl;
                 }
                 else{
                     Kd -= 2 * dp[2];
                     kd_state = 2; // Subtracted
+                    cout << "In Subtraction" << endl;
                 }
             }
             else if(kd_state == 2){
@@ -174,23 +147,78 @@ void PID::UpdateError(double cte, double dt) {
                     best_error = total_error;
                     dp[2] *= 1.1; // Increase dp by 10%
                     kd_cycle = 1; // Pause KD
-                    kp_cycle = 0; /// Next cycle go to KP
+                    ki_cycle = 0; /// Next cycle go to Ki
                     kd_state = 0; // reset for next run;
+                    cout << "Subtration Improved " << endl;
                 }
                 else{
                     Kd += dp[2]; // bring kp back to original state
                     dp[2] *= 0.9; // Take 90%
                     kd_cycle = 1; // Pause KD
-                    kp_cycle = 0; /// Next cycle go to KP
+                    ki_cycle = 0; /// Next cycle go to KI
                     kd_state = 0; // reset for next run;
+                    cout << "Nothing Improved, Reverting back" << endl;
                 }
             }
         }
+        
+        /*
+         * KI Iteration
+         */
+        else if (ki_cycle == 0){
+            // Do Stuff for KI
+            cout << "IN KI !" << endl;
+            if(ki_state == 0){
+                // Do things in default state (1st entry point every cycle)
+                Ki += dp[1];
+                ki_state = 1; // added
+                cout << "In addition " << endl;
+            }
+            else if(ki_state == 1){
+                // Do things if previous state was add
+                if (total_error < best_error){
+                    best_error = total_error;
+                    dp[1] *= 1.1; // Increase dp by 10%
+                    ki_cycle = 1; // Pause KI
+                    kp_cycle = 0; /// Next cycle go to Kp
+                    ki_state = 0; // reset for next run;
+                    cout << "Addition Improved " << endl;
+                }
+                else{
+                    Ki -= 2 * dp[1];
+                    ki_state = 2; // Subtracted
+                    cout << "In Subtraction" << endl;
+                }
+            }
+            else if(ki_state == 2){
+                // Do things if previous state was subtract
+                if (total_error < best_error){
+                    best_error = total_error;
+                    dp[1] *= 1.1; // Increase dp by 10%
+                    ki_cycle = 1; // Pause KI
+                    kp_cycle = 0; /// Next cycle go to Kp
+                    ki_state = 0; // reset for next run;
+                    cout << "Subtration Improved " << endl;
+                }
+                else{
+                    Ki += dp[1]; // bring kp back to original state
+                    dp[1] *= 0.9; // Take 90%
+                    ki_cycle = 1; // Pause KI
+                    kp_cycle = 0; /// Next cycle go to Kp
+                    ki_state = 0; // reset for next run;
+                    cout << "Nothing Improved, Reverting back" << endl;
+                }
+            }
+        }
+        
         total_error = 0.0;
+        //step = 1;
         cout << "Updated Gain" << endl;
         cout << "P: " << Kp << ", I: " << Ki << ", D: " << Kd << endl;
+        Restart(ws);
     }
     step++;
+    
 }
 
 double PID::TotalError(double cte) {
