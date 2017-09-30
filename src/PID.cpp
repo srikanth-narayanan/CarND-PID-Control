@@ -31,7 +31,7 @@ void PID::Init(double Kp, double Ki, double Kd) {
     kp_state = ki_state = kd_state = 0; // a state of 0 is default, 1 add, 2 sub
     kp_cycle = 0, ki_cycle = 1, kd_cycle = 1; // one twiddle cycle 0 - continue, 1 - next param
     settle_step = 100;
-    eval_step = 600;
+    eval_step = 700;
     twiddle = true;
 }
 

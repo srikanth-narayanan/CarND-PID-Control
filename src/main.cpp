@@ -42,11 +42,11 @@ int main()
   // TODO: Initialize the pid variable for steer and throttle.
 
   // Finalised PID values for steering and Throttle
-  pid_st.Init(0.103731, 0.000219164, 3.0027);
-  pid_st.twiddle = false;
-  pid_tr.Init(0.290158, 9.1e-07, 0.1);
-  pid_tr.twiddle = false;
-    
+  
+   pid_st.Init(0.103731, 0.000219164, 3.0027);
+   pid_st.twiddle = false;
+   pid_tr.Init(0.290158, 9.1e-07, 0.1);
+   pid_tr.twiddle = false;
   
   previous_time = clock();
 
