@@ -16,6 +16,17 @@ The I (integral) component of the controller compensates for the bias in the CTE
 
 [Video of PID control.](https://github.com/srikanth-narayanan/CarND-PID-Control/blob/master/Videos/PID_Controls.mp4)
 
+### Hyperparameters Tuning
+
+The gain values for kp, kd and ki are first manuallu tunned. This has to be done becasue the margin of errors from the track left a very narrow corridor for auotomatic tunning using twiddle algorithm. It was very easy for the car to leave the track. Once the base value for Kp, Ki and Kd was achieved for a fixed throttle value, 1/3rd of the track was used to start the initial tunning of the parameter using twiddle. Once a certain step point is reached the simulator is reset and it will use the tweaked PID values and the continued until no further improvements was observed.
+
+The new value is then used to test the car run on the full course, so that it can negotiate the track without leaving the track. I was able to sucessfully get a good parameters, but the throttle was fixed. In order increase the performance I implemented a PID control for the throttle, where the main contribnutors being P and D value, since the throttle values matter only for the curves when the car encouters maximum CTE.
+I ran the twiddle algorithm again for steering and throttle for the optimised value.
+
+The final value of Kp, Ki and Kd for steering was 0.103731, 0.000219164, 3.0027 and throttle was 0.290158, 9.1e-07, 0.1 respectively.
+
+[Video of the final tuned PID control for steering and throttle]
+
 ## Dependencies
 
 * cmake >= 3.5
