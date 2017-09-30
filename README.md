@@ -6,15 +6,15 @@ This project aims at building a PID controller. This controller will connect to 
 
 The P (proportional) component of the controller has direct influence on the car behaviour on the track. It steers in order to compensate for the cross track error (CTE), which is the lane center. If the car move towards the left it steer hard towards the right and vice versa to cause a steady oscillations.
 
-Video of P only control.
+[Video of P only control.]()
 
 The D (differential) component of the controller counteracts the P compoenent tendency to overshoot the lane center and creates a critically damped system.
 
-Video of D only control.
+[Video of D only control.]()
 
 The I (integral) component of the controller compensates for the bias in the CTE which prevents the PD controller from the reaching the lane center. A steering drift or brahviour around the curves are the key areas the I component plays a key role.
 
-Video of PID control.
+[Video of PID control.]()
 
 ## Dependencies
 
@@ -57,8 +57,3 @@ using the following settings:
 ## Code Style
 
 Please (do your best to) stick to [Google's C++ style guide](https://google.github.io/styleguide/cppguide.html).
-
-## Project Instructions and Rubric
-
-Note: regardless of the changes you make, your project must be buildable using
-cmake and make!
