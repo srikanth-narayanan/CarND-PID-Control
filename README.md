@@ -6,15 +6,15 @@ This project aims at building a PID controller. This controller will connect to 
 
 The P (proportional) component of the controller has direct influence on the car behaviour on the track. It steers in order to compensate for the cross track error (CTE), which is the lane center. If the car move towards the left it steer hard towards the right and vice versa to cause a steady oscillations.
 
-[Video of P only control.]()
+[Video of P only control.](https://github.com/srikanth-narayanan/CarND-PID-Control/blob/master/Videos/P_Only_Control.mp4)
 
 The D (differential) component of the controller counteracts the P compoenent tendency to overshoot the lane center and creates a critically damped system.
 
-[Video of D only control.]()
+[Video of PD only control.](https://github.com/srikanth-narayanan/CarND-PID-Control/blob/master/Videos/PD_Control.mp4)
 
 The I (integral) component of the controller compensates for the bias in the CTE which prevents the PD controller from the reaching the lane center. A steering drift or brahviour around the curves are the key areas the I component plays a key role.
 
-[Video of PID control.]()
+[Video of PID control.](https://github.com/srikanth-narayanan/CarND-PID-Control/blob/master/Videos/PID_Controls.mp4)
 
 ## Dependencies
 
