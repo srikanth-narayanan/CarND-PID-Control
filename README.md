@@ -1,4 +1,20 @@
-# Self-Driving Car Engineer Nanodegree Program PID - Controls
+# PID - Controls
+
+This project aims at building a PID controller. This controller will connect to the udacity simulator to provide steering angle and throttle to race the car around the track autonomously. The PID controller is tunned using the twiddle algorithm. The PID controller must send steering and throttle values to the car while ensuring to keep within the track limits and drive around the track.
+
+## Key Discussion points
+
+The P (proportional) component of the controller has direct influence on the car behaviour on the track. It steers in order to compensate for the cross track error (CTE), which is the lane center. If the car move towards the left it steer hard towards the right and vice versa to cause a steady oscillations.
+
+Video of P only control.
+
+The D (differential) component of the controller counteracts the P compoenent tendency to overshoot the lane center and creates a critically damped system.
+
+Video of D only control.
+
+The I (integral) component of the controller compensates for the bias in the CTE which prevents the PD controller from the reaching the lane center. A steering drift or brahviour around the curves are the key areas the I component plays a key role.
+
+Video of PID control.
 
 ## Dependencies
 
